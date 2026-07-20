@@ -1,0 +1,32 @@
+# humanvals
+
+> Human feedback → verified agent memory. Python library: operator evaluations
+> of agent outputs become retrievable prompt guidelines; every injection is
+> exposure-logged; Wilson-bound promotion verifies impact before guidelines
+> become permanent. Zero-dependency core, SQLite storage, FastAPI review
+> server + React dashboard included.
+
+Integration is two calls: `hv.guidelines(input, agent=...)` before generation
+(append `.as_prompt()` to the system prompt), `hv.record_case(..., guidelines=gs)`
+after. The same GuidelineSet MUST be passed to record_case — the exposure log
+is how impact is measured.
+
+## Docs
+
+- [Agent integration guide](docs/AGENT_GUIDE.md): complete API with copy-paste
+  recipes — read this first when integrating
+- [HumanVals RFC](docs/HumanVals_RFC.md): the concept — cases, 4-dimension
+  review, write-time curation, Wilson-bound promotion, known limitations
+- [README](README.md): overview, install, dashboard, lifecycle table
+- [ADRs](docs/adr/): all architecture decisions with rationale
+
+## Examples (runnable without API keys)
+
+- [Pydantic AI](examples/pydantic_ai_agent.py)
+- [LangGraph](examples/langgraph_agent.py)
+- [CrewAI](examples/crewai_agent.py)
+
+## Related
+
+- [Engram RFC v3](https://github.com/alinaqi/alinaqi/blob/main/docs/Engram_RFC_v3.md):
+  the memory framework this builds on

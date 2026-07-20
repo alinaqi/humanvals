@@ -1,0 +1,20 @@
+# Render blueprint — demo deployment of the humanvals review server + dashboard.
+# Deploy: connect this repo on render.com (or `render blueprint launch`).
+# NOTE: demo-only. SQLite lives on the instance disk; use a custom Store for
+# real production persistence (ADR-0003).
+services:
+  - type: web
+    name: humanvals
+    runtime: python
+    plan: starter
+    buildCommand: |
+      pip install uv && uv sync --extra server
+      cd dashboard && npm ci && npm run build
+    startCommand: uv run uvicorn humanvals.server.app:create_app --factory --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: HUMANVALS_DB
+        value: /var/data/humanvals.db
+    disk:
+      name: humanvals-data
+      mountPath: /var/data
+      sizeGB: 1

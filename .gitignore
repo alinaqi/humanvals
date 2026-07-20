@@ -1,0 +1,48 @@
+# Environment files - NEVER commit
+.env
+.env.*
+!.env.example
+
+# Secrets
+*.pem
+*.key
+credentials.json
+secrets.json
+service-account*.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Node
+node_modules/
+dashboard/dist/
+
+# Local data
+*.db
+*.sqlite
+*.sqlite3
+.humanvals/
+
+# Code graph data (auto-generated)
+.code-graph/
+
+# Cross-tool agent dirs (derived, regenerated)
+.kimi/
+.codex/
+.agents/
+
+# IDE / OS
+.idea/
+.vscode/settings.json
+.DS_Store
