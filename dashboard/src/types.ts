@@ -19,6 +19,7 @@ export interface Guideline {
   applies_when: string
   origin: string
   status: 'candidate' | 'validated' | 'superseded' | 'rejected'
+  kind: 'heuristic' | 'policy'
   exposures: number
   wins: number
   validation_count: number
@@ -51,6 +52,7 @@ export interface EvaluationBody {
   notes: string
   guideline_text: string
   applies_when: string
+  guideline_kind: 'heuristic' | 'policy'
   resolution: 'add' | 'reinforce' | 'override' | 'scope_both'
   target_guideline_id: string | null
 }

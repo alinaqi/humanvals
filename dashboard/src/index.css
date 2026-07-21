@@ -75,6 +75,7 @@ a { color: var(--accent); }
 .chip.candidate { color: var(--accent); }
 .chip.superseded { color: var(--text-2); }
 .chip.rejected { color: var(--critical); }
+.chip.policy { color: var(--serious); margin-left: 6px; }
 
 .dim-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
 .dim { display: flex; flex-direction: column; gap: 4px; }

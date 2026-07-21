@@ -158,7 +158,16 @@ promote  iff exposures >= N_min  AND  wilson_lower(wins, exposures) >= p_min
 demote   iff exposures >= N_min  AND  wilson_upper(wins, exposures) <  p_demote
 ```
 
-Defaults: `N_min = 5`, `p_min = 0.6`, `p_demote = 0.4` — all pluggable.
+Defaults: `N_min = 5`, `p_min = 0.55`, `p_demote = 0.4` — all pluggable.
+
+**Not every guideline is a hypothesis.** Guidelines carry a `kind` chosen by
+the operator: **heuristics** (tone, style, preferences — cheap to be wrong
+about) go through the statistical lifecycle above; **policies** (money,
+compliance, safety) are governed by human authority — active immediately,
+never statistically demoted, removable only by a human. Statistics govern
+only the tier where being wrong is cheap; criticality determines the
+governance path ([ADR-0009](adr/0009-policy-vs-heuristic.md)). Hold-out
+experiments (Q5) are ethical only for heuristics.
 Promotion sets `Origin: stated → validated` (Engram's confabulation-prevention
 tier); demotion returns a guideline to review with its evidence attached.
 Sample-size floors exist because three thumbs-up is anecdote, not evidence.

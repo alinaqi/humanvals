@@ -31,6 +31,16 @@ describe('EvalForm', () => {
     expect(screen.getByText('Submit evaluation')).toBeInTheDocument()
   })
 
+  it('offers the policy toggle only once a guideline is typed', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    render(<EvalForm caseId="c1" agent="bot" onSubmitted={() => {}} />)
+    expect(screen.queryByText(/Critical policy/)).toBeNull()
+    fireEvent.change(
+      screen.getByPlaceholderText('How should the agent handle this next time?'),
+      { target: { value: 'Always confirm the order number' } })
+    expect(screen.getByText(/Critical policy/)).toBeInTheDocument()
+  })
+
   it('asks for the correct tool call only when tool dimension is No', async () => {
     const { fireEvent } = await import('@testing-library/react')
     render(<EvalForm caseId="c1" agent="bot" onSubmitted={() => {}} />)

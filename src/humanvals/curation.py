@@ -10,6 +10,7 @@ from humanvals.store import SQLiteStore
 
 CONFLICT_GATE = 0.25  # lexical embedder scale; 'same neighborhood', not 'same text'
 RESOLUTIONS = ('add', 'reinforce', 'override', 'scope_both')
+KINDS = ('heuristic', 'policy')
 
 
 def find_conflicts(store: SQLiteStore, embedder: Embedder, text: str,
@@ -29,6 +30,8 @@ def find_conflicts(store: SQLiteStore, embedder: Embedder, text: str,
 def validate_resolution(resolution: str, target: str | None, ev: Evaluation) -> None:
     if resolution not in RESOLUTIONS:
         raise ValueError(f'resolution must be one of {RESOLUTIONS}')
+    if ev.guideline_kind not in KINDS:
+        raise ValueError(f'guideline_kind must be one of {KINDS}')
     if resolution == 'scope_both' and not ev.applies_when:
         raise ValueError('applies_when is required for scope_both: state when the new '
                          'guideline applies so both can coexist')
@@ -44,9 +47,13 @@ def apply_resolution(store: SQLiteStore, embedder: Embedder, ev: Evaluation,
         store.reinforce(target)
         return target
     case = store.get_case(ev.case_id)
+    # Policies are active on operator authority the moment they're saved;
+    # heuristics start as candidates and must earn validation (ADR-0009).
+    status = 'validated' if ev.guideline_kind == 'policy' else 'candidate'
     new = Guideline(id=new_id(), agent=case.agent, namespace=case.namespace,
                     intent_text=case.input, text=ev.guideline_text,
-                    applies_when=ev.applies_when, origin='stated', status='candidate',
+                    applies_when=ev.applies_when, origin='stated', status=status,
+                    kind=ev.guideline_kind,
                     source_case_id=case.id, created_at=time.time())
     # applies_when is the operator's activation context (Engram): folding it
     # into the intent vector lets the guideline generalize past the one case

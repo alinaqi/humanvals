@@ -40,6 +40,8 @@ def wilson_upper(wins: int, n: int) -> float:
 def run_promotions(store: SQLiteStore, policy: PromotionPolicy) -> list[PromotionChange]:
     changes: list[PromotionChange] = []
     for g in store.list_guidelines():
+        if g.kind == 'policy':
+            continue  # authority tier: never statistically promoted/demoted (ADR-0009)
         if g.exposures < policy.min_exposures:
             continue
         promotable = wilson_lower(g.wins, g.exposures) >= policy.promote_threshold

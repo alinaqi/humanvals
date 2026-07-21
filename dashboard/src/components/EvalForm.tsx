@@ -17,6 +17,7 @@ export function EvalForm(props: { caseId: string; agent: string; onSubmitted: ()
     { intent_ok: true, output_ok: true, context_ok: true, tool_ok: true })
   const [expectedTool, setExpectedTool] = useState('')
   const [guideline, setGuideline] = useState('')
+  const [isPolicy, setIsPolicy] = useState(false)
   const [appliesWhen, setAppliesWhen] = useState('')
   const [reviewer, setReviewer] = useState('operator')
   const [conflicts, setConflicts] = useState<Guideline[]>([])
@@ -40,9 +41,11 @@ export function EvalForm(props: { caseId: string; agent: string; onSubmitted: ()
       await api.evaluate(props.caseId, {
         ...dims, expected_tool_call: dims.tool_ok ? '' : expectedTool.trim(),
         reviewer, notes: '', guideline_text: guideline.trim(),
-        applies_when: appliesWhen.trim(), resolution, target_guideline_id: target
+        applies_when: appliesWhen.trim(),
+        guideline_kind: isPolicy ? 'policy' : 'heuristic',
+        resolution, target_guideline_id: target
       })
-      setGuideline(''); setAppliesWhen(''); setExpectedTool('')
+      setGuideline(''); setAppliesWhen(''); setExpectedTool(''); setIsPolicy(false)
       props.onSubmitted()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -80,6 +83,17 @@ export function EvalForm(props: { caseId: string; agent: string; onSubmitted: ()
       {conflicts.length > 0 && (
         <ConflictPanel conflicts={conflicts} resolution={resolution} target={target}
           onPick={(r, t) => { setResolution(r); setTarget(t) }} />
+      )}
+      {guideline.trim() && (
+        <label style={{ display: 'flex', gap: 6, alignItems: 'flex-start', margin: '8px 0' }}>
+          <input type="checkbox" checked={isPolicy}
+            onChange={e => setIsPolicy(e.target.checked)} />
+          <span>
+            Critical policy — active immediately, never auto-demoted by statistics,
+            removable only by a human. Use for money, compliance, or safety rules;
+            leave unchecked for style and preference guidance.
+          </span>
+        </label>
       )}
       {(resolution === 'scope_both' || guideline) && (
         <>

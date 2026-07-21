@@ -44,6 +44,7 @@ class Evaluation:
     notes: str = ''
     guideline_text: str = ''
     applies_when: str = ''
+    guideline_kind: str = 'heuristic'  # heuristic | policy (ADR-0009)
 
 
 @dataclass
@@ -56,6 +57,7 @@ class Guideline:
     applies_when: str
     origin: str  # stated | validated
     status: str  # candidate | validated | superseded | rejected
+    kind: str = 'heuristic'  # heuristic (measured tier) | policy (authority tier)
     exposures: int = 0
     wins: int = 0
     validation_count: int = 0
@@ -76,9 +78,13 @@ class GuidelineSet:
         return [g.id for g in self.items]
 
     def as_prompt(self) -> str:
-        validated = [g for g in self.items if g.status == 'validated']
-        candidates = [g for g in self.items if g.status != 'validated']
+        policies = [g for g in self.items if g.kind == 'policy']
+        validated = [g for g in self.items if g.kind != 'policy' and g.status == 'validated']
+        candidates = [g for g in self.items if g.kind != 'policy' and g.status != 'validated']
         parts: list[str] = []
+        if policies:
+            parts.append('Operator policies — always follow these:')
+            parts.extend(_bullet(g) for g in policies)
         if validated:
             parts.append('Operator guidance — follow these instructions:')
             parts.extend(_bullet(g) for g in validated)

@@ -102,6 +102,13 @@ declining curve is the whole point.
 | `superseded` | overridden by a newer guideline (never deleted) | no |
 | `rejected` | failed measurement | no |
 
+Guidelines also carry a **kind**: `heuristic` (default — the measured tier
+above) or `policy` (critical rules: money, compliance, safety). Policies are
+active immediately on operator authority, rendered as an "always follow"
+block, never statistically demoted, and removable only by a human
+([ADR-0009](docs/adr/0009-policy-vs-heuristic.md)). Statistics govern only
+the tier where being wrong is cheap.
+
 ```python
 hv.run_promotions()                      # applies the policy; returns changes
 HumanVals(policy=PromotionPolicy(min_exposures=10, promote_threshold=0.6))

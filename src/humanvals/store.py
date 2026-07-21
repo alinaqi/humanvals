@@ -23,18 +23,20 @@ CREATE TABLE IF NOT EXISTS guidelines (
   id TEXT PRIMARY KEY, agent TEXT, namespace TEXT, intent_text TEXT, intent_vec TEXT,
   text TEXT, applies_when TEXT, origin TEXT, status TEXT, exposures INTEGER DEFAULT 0,
   wins INTEGER DEFAULT 0, validation_count INTEGER DEFAULT 0, superseded_by TEXT,
-  source_case_id TEXT, created_at REAL, promoted_at REAL);
+  source_case_id TEXT, created_at REAL, promoted_at REAL,
+  kind TEXT DEFAULT 'heuristic');
 CREATE TABLE IF NOT EXISTS exposure_credits (
   case_id TEXT, guideline_id TEXT, PRIMARY KEY (case_id, guideline_id));
 """
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # version-gated ALTERs applied to databases created by older releases
 _MIGRATIONS: dict[int, list[str]] = {
     2: ["ALTER TABLE evaluations ADD COLUMN tool_ok INTEGER DEFAULT 1",
         "ALTER TABLE evaluations ADD COLUMN expected_tool_call TEXT DEFAULT ''"],
+    3: ["ALTER TABLE guidelines ADD COLUMN kind TEXT DEFAULT 'heuristic'"],
 }
 
 
@@ -123,10 +125,13 @@ class SQLiteStore:
 
     def add_guideline(self, g: Guideline, intent_vec: list[float]) -> None:
         self.conn.execute(
-            'INSERT INTO guidelines VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO guidelines (id, agent, namespace, intent_text, intent_vec,'
+            ' text, applies_when, origin, status, exposures, wins, validation_count,'
+            ' superseded_by, source_case_id, created_at, promoted_at, kind)'
+            ' VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             (g.id, g.agent, g.namespace, g.intent_text, json.dumps(intent_vec), g.text,
              g.applies_when, g.origin, g.status, g.exposures, g.wins, g.validation_count,
-             g.superseded_by, g.source_case_id, g.created_at, g.promoted_at))
+             g.superseded_by, g.source_case_id, g.created_at, g.promoted_at, g.kind))
         self.conn.commit()
 
     def list_guidelines(self, agent: str | None = None, namespace: str | None = None,
@@ -207,4 +212,4 @@ def _guideline(row: sqlite3.Row) -> Guideline:
                      validation_count=row['validation_count'],
                      superseded_by=row['superseded_by'],
                      source_case_id=row['source_case_id'], created_at=row['created_at'],
-                     promoted_at=row['promoted_at'])
+                     promoted_at=row['promoted_at'], kind=row['kind'])

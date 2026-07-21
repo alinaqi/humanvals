@@ -11,6 +11,7 @@ from humanvals.store import SQLiteStore
 
 SIMILARITY_GATE = 0.30  # calibrated for the stopword-filtered default embedder (ADR-0004)
 VALIDATED_BONUS = 0.25
+POLICY_BONUS = 1.0  # policies outrank everything at equal relevance (ADR-0009)
 
 
 def select_guidelines(store: SQLiteStore, embedder: Embedder, query: str,
@@ -31,7 +32,10 @@ def _score_active(store: SQLiteStore, query_vec: list[float], agent: str,
         sim = cosine(query_vec, store.intent_vec(g.id))
         if sim < SIMILARITY_GATE:
             continue
-        bonus = VALIDATED_BONUS if g.status == 'validated' else 0.0
+        if g.kind == 'policy':
+            bonus = POLICY_BONUS
+        else:
+            bonus = VALIDATED_BONUS if g.status == 'validated' else 0.0
         scored.append((sim * (1.0 + bonus), g))
     return scored
 

@@ -67,6 +67,9 @@ for case in hv.list_cases(unreviewed_only=True):
         expected_tool_call='orders.lookup(order_id) before replying',  # when tool_ok=False
         guideline_text='Always include the refund policy link',  # optional
         applies_when='refund requests',                          # scope, optional
+        guideline_kind='heuristic',  # or 'policy': critical rules (money/compliance/
+                                     # safety) — active immediately, never
+                                     # statistically demoted, human-removable only
         reviewer='ali'))
 ```
 

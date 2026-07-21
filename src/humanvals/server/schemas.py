@@ -26,6 +26,7 @@ class EvaluationIn(BaseModel):
     notes: str = ''
     guideline_text: str = ''
     applies_when: str = ''
+    guideline_kind: str = 'heuristic'
     resolution: str = 'add'
     target_guideline_id: str | None = None
 

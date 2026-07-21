@@ -45,7 +45,10 @@ export function GuidelinesView() {
                   </div>
                 )}
               </td>
-              <td><span className={`chip ${g.status}`}>{g.status}</span></td>
+              <td>
+                <span className={`chip ${g.status}`}>{g.status}</span>
+                {g.kind === 'policy' && <span className="chip policy">policy</span>}
+              </td>
               <td style={{ color: 'var(--text-2)', fontSize: 13 }}>
                 {g.intent_text.slice(0, 60)}
               </td>

@@ -58,7 +58,8 @@ def _register_routes(app: FastAPI, hv: HumanVals) -> None:  # noqa: C901
                         expected_tool_call=body.expected_tool_call,
                         reviewer=body.reviewer, notes=body.notes,
                         guideline_text=body.guideline_text,
-                        applies_when=body.applies_when)
+                        applies_when=body.applies_when,
+                        guideline_kind=body.guideline_kind)
         try:
             result = hv.evaluate(ev, resolution=body.resolution,
                                  target_guideline_id=body.target_guideline_id)
