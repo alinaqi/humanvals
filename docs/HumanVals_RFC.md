@@ -238,3 +238,17 @@ trade-offs, not oversights:
   matching requests (hold-out control), turning correlational win rates into a
   measured lift. What fraction balances statistical power against withholding
   known-good guidance from live traffic?
+- **Q6** — Tool-correction distillation: `expected_tool_call` corrections are
+  currently stored evidence only. When several corrections accumulate in the
+  same intent cluster (e.g. three reviewers independently say "call
+  `orders.lookup` before replying" on refund intents), should the system
+  distill them into a candidate guideline automatically? The promotion
+  pipeline would treat it like any operator-stated guideline — measured
+  exposures, Wilson bounds — but open sub-questions remain: how many
+  concurring corrections justify a candidate (they are near-ground-truth
+  labels, richer than a thumbs-down); does a distilled guideline cite its
+  source corrections as provenance (Engram `Origin: inferred` rather than
+  `stated`, rendered with lower confidence until validated); and is the
+  distillation step template-based (safe, dependency-free) or LLM-assisted
+  (better generalization, but introduces an untrusted-input path from
+  reviewer text into prompts — see the write-time curation trust boundary)?
