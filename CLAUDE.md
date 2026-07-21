@@ -48,7 +48,7 @@ uv run python examples/crewai_agent.py
 Agent calls `hv.guidelines(input)` → intent lookup returns budgeted guidelines →
 agent appends them to its prompt → `hv.record_case(...)` logs input/output/metadata
 **including which guidelines were injected** (exposure log — the backbone).
-Humans evaluate cases on 4 dimensions (intent/output/context/guideline) via the
+Humans evaluate cases on 5 dimensions (intent/output/context/tool/guideline) via the
 dashboard → evaluations update guideline validation stats → `hv.run_promotions()`
 promotes/demotes via Wilson-bound policy. See docs/adr/ for all decisions.
 

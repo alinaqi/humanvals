@@ -28,13 +28,19 @@ class Case:
 
 @dataclass
 class Evaluation:
-    """Operator review of one case — the 4 dimensions (RFC §3.2)."""
+    """Operator review of one case — the evaluation dimensions (RFC §3.2).
+
+    tool_ok defaults True ("no tool problem"); when the reviewer answers No,
+    expected_tool_call captures what should have been called instead.
+    """
 
     case_id: str
     intent_ok: bool
     output_ok: bool
     context_ok: bool
     reviewer: str
+    tool_ok: bool = True
+    expected_tool_call: str = ''
     notes: str = ''
     guideline_text: str = ''
     applies_when: str = ''

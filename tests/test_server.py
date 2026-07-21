@@ -21,6 +21,7 @@ def seed_case(client: TestClient, text: str = 'refund my order please') -> str:
 
 def evaluate(client: TestClient, case_id: str, **overrides: object) -> dict:  # type: ignore[type-arg]
     body: dict = {'intent_ok': True, 'output_ok': False, 'context_ok': True,  # type: ignore[type-arg]
+                  'tool_ok': True, 'expected_tool_call': '',
                   'reviewer': 'ali', 'guideline_text': 'Link the refund policy',
                   'applies_when': '', 'resolution': 'add'}
     body.update(overrides)
@@ -87,6 +88,16 @@ def test_guideline_retrieval_endpoint(client: TestClient) -> None:
     assert r.status_code == 200
     assert len(r.json()['guidelines']) == 1
     assert 'prompt' in r.json()
+
+
+def test_evaluate_with_tool_correction(client: TestClient) -> None:
+    case_id = seed_case(client)
+    evaluate(client, case_id, tool_ok=False,
+             expected_tool_call='orders.lookup(order_id) first')
+    r = client.get(f'/api/cases/{case_id}/evaluations')
+    assert r.status_code == 200
+    assert r.json()[0]['tool_ok'] is False
+    assert r.json()[0]['expected_tool_call'] == 'orders.lookup(order_id) first'
 
 
 def test_promotions_endpoint(client: TestClient) -> None:

@@ -5,7 +5,8 @@ import type { EvaluationBody, Guideline } from '../types'
 const DIMENSIONS = [
   ['intent_ok', 'Understood the intent?'],
   ['output_ok', 'Output correct?'],
-  ['context_ok', 'Right context used?']
+  ['context_ok', 'Right context used?'],
+  ['tool_ok', 'Right tool calls?']
 ] as const
 
 type DimKey = (typeof DIMENSIONS)[number][0]
@@ -13,7 +14,8 @@ type Resolution = EvaluationBody['resolution']
 
 export function EvalForm(props: { caseId: string; agent: string; onSubmitted: () => void }) {
   const [dims, setDims] = useState<Record<DimKey, boolean>>(
-    { intent_ok: true, output_ok: true, context_ok: true })
+    { intent_ok: true, output_ok: true, context_ok: true, tool_ok: true })
+  const [expectedTool, setExpectedTool] = useState('')
   const [guideline, setGuideline] = useState('')
   const [appliesWhen, setAppliesWhen] = useState('')
   const [reviewer, setReviewer] = useState('operator')
@@ -36,10 +38,11 @@ export function EvalForm(props: { caseId: string; agent: string; onSubmitted: ()
     setBusy(true); setError('')
     try {
       await api.evaluate(props.caseId, {
-        ...dims, reviewer, notes: '', guideline_text: guideline.trim(),
+        ...dims, expected_tool_call: dims.tool_ok ? '' : expectedTool.trim(),
+        reviewer, notes: '', guideline_text: guideline.trim(),
         applies_when: appliesWhen.trim(), resolution, target_guideline_id: target
       })
-      setGuideline(''); setAppliesWhen('')
+      setGuideline(''); setAppliesWhen(''); setExpectedTool('')
       props.onSubmitted()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -63,6 +66,14 @@ export function EvalForm(props: { caseId: string; agent: string; onSubmitted: ()
           </div>
         ))}
       </div>
+      {!dims.tool_ok && (
+        <>
+          <label className="field">What should the tool call have been?</label>
+          <input type="text" value={expectedTool}
+            placeholder="e.g. orders.lookup(order_id) before replying"
+            onChange={e => setExpectedTool(e.target.value)} />
+        </>
+      )}
       <label className="field">Guideline for the future (optional)</label>
       <textarea value={guideline} placeholder="How should the agent handle this next time?"
         onChange={e => setGuideline(e.target.value)} />

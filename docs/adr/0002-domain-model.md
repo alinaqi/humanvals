@@ -16,9 +16,12 @@ Three aggregates, stdlib dataclasses:
   tool_calls, context), guidelines_injected, created_at`. The
   `guidelines_injected` exposure log is REQUIRED (may be empty list, never
   absent) — every impact measurement joins through it.
-- **Evaluation**: `case_id, intent_ok, output_ok, context_ok, notes,
-  guideline_text?, applies_when?, reviewer, created_at`. `output_ok` is the
-  win/loss signal for exposed guidelines.
+- **Evaluation**: `case_id, intent_ok, output_ok, context_ok, tool_ok,
+  expected_tool_call?, notes, guideline_text?, applies_when?, reviewer,
+  created_at`. `output_ok` is the win/loss signal for exposed guidelines.
+  `tool_ok` (default true = "no tool problem") probes action selection; on
+  false, `expected_tool_call` records the operator's concrete correction.
+  (Added at schema v2 via the user_version migration path from ADR-0003.)
 - **Guideline**: `id, agent, namespace, intent_key, text, applies_when,
   origin (stated|validated), status (candidate|validated|superseded|rejected),
   exposures, wins, validation_count, superseded_by, source_case_id,

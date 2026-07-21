@@ -45,6 +45,8 @@ export interface EvaluationBody {
   intent_ok: boolean
   output_ok: boolean
   context_ok: boolean
+  tool_ok: boolean
+  expected_tool_call: string
   reviewer: string
   notes: string
   guideline_text: string

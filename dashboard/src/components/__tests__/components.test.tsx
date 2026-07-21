@@ -21,13 +21,23 @@ describe('SummaryTiles', () => {
 })
 
 describe('EvalForm', () => {
-  it('renders the four evaluation dimensions', () => {
+  it('renders the evaluation dimensions and guideline field', () => {
     render(<EvalForm caseId="c1" agent="bot" onSubmitted={() => {}} />)
     expect(screen.getByText('Understood the intent?')).toBeInTheDocument()
     expect(screen.getByText('Output correct?')).toBeInTheDocument()
     expect(screen.getByText('Right context used?')).toBeInTheDocument()
+    expect(screen.getByText('Right tool calls?')).toBeInTheDocument()
     expect(screen.getByText('Guideline for the future (optional)')).toBeInTheDocument()
     expect(screen.getByText('Submit evaluation')).toBeInTheDocument()
+  })
+
+  it('asks for the correct tool call only when tool dimension is No', async () => {
+    const { fireEvent } = await import('@testing-library/react')
+    render(<EvalForm caseId="c1" agent="bot" onSubmitted={() => {}} />)
+    expect(screen.queryByText('What should the tool call have been?')).toBeNull()
+    const toolSeg = screen.getByText('Right tool calls?').parentElement!
+    fireEvent.click(toolSeg.querySelectorAll('button')[1])
+    expect(screen.getByText('What should the tool call have been?')).toBeInTheDocument()
   })
 })
 

@@ -96,7 +96,11 @@ def main() -> None:
     # operator leaves the guideline on the LAST bad case (so no earlier case
     # has it injected — exposures must reflect what was actually in prompts).
     early_ids = [generate(hv, request, live=False)[0] for request in EARLY]
-    for case_id in early_ids[:-1]:
+    hv.evaluate(Evaluation(  # first case: also a concrete tool correction
+        case_id=early_ids[0], intent_ok=True, output_ok=False, context_ok=False,
+        tool_ok=False, expected_tool_call='orders.lookup(order_id) before replying',
+        reviewer='ali'))
+    for case_id in early_ids[1:-1]:
         review(hv, case_id, ok=False)
     review(hv, early_ids[-1], ok=False, guideline=GUIDELINE,
            applies_when='refund requests')

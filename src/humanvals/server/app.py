@@ -54,6 +54,8 @@ def _register_routes(app: FastAPI, hv: HumanVals) -> None:  # noqa: C901
     def evaluate(case_id: str, body: EvaluationIn) -> dict[str, Any]:
         ev = Evaluation(case_id=case_id, intent_ok=body.intent_ok,
                         output_ok=body.output_ok, context_ok=body.context_ok,
+                        tool_ok=body.tool_ok,
+                        expected_tool_call=body.expected_tool_call,
                         reviewer=body.reviewer, notes=body.notes,
                         guideline_text=body.guideline_text,
                         applies_when=body.applies_when)
@@ -65,6 +67,14 @@ def _register_routes(app: FastAPI, hv: HumanVals) -> None:  # noqa: C901
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
         return dataclasses.asdict(result)
+
+    @app.get('/api/cases/{case_id}/evaluations')
+    def case_evaluations(case_id: str) -> list[dict[str, Any]]:
+        rows = hv.store.list_case_evaluations(case_id)
+        return [{**dict(r),
+                 'intent_ok': bool(r['intent_ok']), 'output_ok': bool(r['output_ok']),
+                 'context_ok': bool(r['context_ok']), 'tool_ok': bool(r['tool_ok'])}
+                for r in rows]
 
     @app.post('/api/conflicts')
     def conflicts(body: ConflictQuery) -> list[dict[str, Any]]:

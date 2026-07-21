@@ -13,7 +13,7 @@ frameworks. Neither may bloat the core.
   check + resolution), guidelines, promotion trigger, metrics. Serves the
   built dashboard as static files when present.
 - **Dashboard**: React+TS+Vite in `dashboard/`, talks to the REST API. Three
-  views: Review queue (case detail + 4-dimension form), Guidelines (lifecycle
+  views: Review queue (case detail + 5-dimension form), Guidelines (lifecycle
   states + evidence), Metrics (intervention rate over time). Neat/simple:
   system font, one accent color, no UI framework dependency beyond React.
 - **Frameworks**: NO adapters package — plain examples in `examples/` showing

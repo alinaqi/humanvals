@@ -57,6 +57,29 @@ def test_evaluate_without_guideline_creates_none(hv: HumanVals) -> None:
     assert hv.list_guidelines() == []
 
 
+def test_evaluate_tool_dimension_roundtrip(hv: HumanVals) -> None:
+    case_id = hv.record_case(agent='bot', input='refund order 5', output='done',
+                             metadata={'tool_calls': [{'name': 'orders.delete'}]})
+    hv.evaluate(
+        Evaluation(case_id=case_id, intent_ok=True, output_ok=False, context_ok=True,
+                   tool_ok=False,
+                   expected_tool_call='orders.lookup(order_id) then refunds.create',
+                   reviewer='ali')
+    )
+    row = hv.store.list_evaluations()[0]
+    assert row['tool_ok'] == 0
+    assert row['expected_tool_call'] == 'orders.lookup(order_id) then refunds.create'
+
+
+def test_tool_ok_defaults_true(hv: HumanVals) -> None:
+    case_id = hv.record_case(agent='bot', input='x', output='y')
+    hv.evaluate(Evaluation(case_id=case_id, intent_ok=True, output_ok=True,
+                           context_ok=True, reviewer='ali'))
+    row = hv.store.list_evaluations()[0]
+    assert row['tool_ok'] == 1
+    assert row['expected_tool_call'] == ''
+
+
 def test_list_cases_unreviewed_only(hv: HumanVals) -> None:
     a = hv.record_case(agent='bot', input='a', output='1')
     hv.record_case(agent='bot', input='b', output='2')

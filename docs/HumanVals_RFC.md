@@ -37,7 +37,7 @@ Engram specifies applied end to end:
 | Namespace isolation (interference) | Guidelines scoped per agent + namespace |
 | Context-binding prevention | Explicit `applies_when` captured at review time |
 | Retrieve-time synthesis | Guidelines injected as prompt instructions; no background reflection |
-| Amnesia measurement protocol (§6.2) | 4-dimension case evaluation doubles as labeled probes |
+| Amnesia measurement protocol (§6.2) | multi-dimension case evaluation doubles as labeled probes |
 | Confabulation prevention | Candidate vs. validated tiers rendered distinctly in the prompt |
 
 Where Engram diagnoses *whether* an agent forgets, HumanVals closes the loop on
@@ -52,9 +52,10 @@ Where Engram diagnoses *whether* an agent forgets, HumanVals closes the loop on
         ▲        context, guidelines_injected)                   │
         │                     │                                  │
         │                     ▼                                  │
-        │           human review (4 dimensions)                  │
+        │           human review (5 dimensions)                  │
         │        a) intent understood?   b) output correct?      │
-        │        c) right context used?  d) guideline for future │
+        │        c) right context used?  d) right tool calls?    │
+        │           (+ expected call)    e) guideline for future │
         │                     │                                  │
         │                     ▼                                  │
         │        distillation: intent clustering, duplicate      │
@@ -85,21 +86,27 @@ guidelines_injected the exposure log — REQUIRED, the backbone of measurement
 impact measurement, promotion, demotion, intervention-rate metrics — joins
 through it. A case without an exposure log is unusable as evidence.
 
-### 3.2 Four-dimension evaluation
+### 3.2 Multi-dimension evaluation
 
-Operators answer four questions per case. The first three are boolean probes
-(with optional notes); the fourth is generative:
+Operators answer five questions per case. The first four are boolean probes
+(with optional notes); the fifth is generative:
 
 1. **Intent** — did the agent understand what was being asked?
 2. **Output** — is the output designed and factually correct?
 3. **Context** — did the agent use the right context?
-4. **Guideline** — one instruction for handling this in future, plus
+4. **Tool use** — did the agent call the right tools? On *No*, the operator
+   states **what the correct tool call would have been**
+   (`expected_tool_call`) — a concrete correction, not just a label, judged
+   against the tool calls visible in the case metadata.
+5. **Guideline** — one instruction for handling this in future, plus
    **`applies_when`**: the operator states the applicability conditions
    explicitly, so scope is never inferred.
 
-Dimensions 1–3 map onto Engram's amnesia probes (encoding quality,
-confabulation, context-binding/interference), which makes every review a
-labeled measurement, not just feedback.
+Dimensions 1–4 map onto Engram's amnesia probes (encoding quality,
+confabulation, context-binding/interference, action selection), which makes
+every review a labeled measurement, not just feedback. `output_ok` remains the
+single win/loss signal for guideline measurement (ADR-0002); the other booleans
+are diagnostic labels.
 
 ### 3.3 Retrieval ("finetuned-prompt")
 

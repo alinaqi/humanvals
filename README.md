@@ -21,7 +21,7 @@ The full concept: [docs/HumanVals_RFC.md](docs/HumanVals_RFC.md).
 flowchart LR
     A[Agent run] -->|"guidelines(input)"| B[Injected prompt]
     B --> C["Case<br/>(input, output, metadata,<br/>guidelines_injected)"]
-    C --> D["Human review<br/>4 dimensions"]
+    C --> D["Human review<br/>5 dimensions"]
     D -->|"guideline + applies_when"| E[Candidate guideline]
     E -->|"measured exposures<br/>Wilson lower bound"| F[Validated guideline]
     F -->|retrieval| A
@@ -31,8 +31,9 @@ flowchart LR
 1. **Capture** — every agent run is recorded as a *case* with its exposure log
    (which guidelines were injected). The exposure log is the backbone: all
    measurement joins through it.
-2. **Review** — operators answer four questions per case: intent understood?
-   output correct? right context? plus an optional *guideline for the future*
+2. **Review** — operators answer five questions per case: intent understood?
+   output correct? right context? right tool calls (and if not, what the
+   correct call would have been)? plus an optional *guideline for the future*
    with explicit `applies_when` scope.
 3. **Learn** — guidelines are retrieved by intent similarity (precision-first:
    nothing beats something marginal), within a strict prompt budget, namespaced
@@ -85,7 +86,7 @@ uvicorn humanvals.server.app:create_app --factory   # API + dashboard on :8000
 ![Review dashboard](docs/assets/dashboard-review.png)
 
 Operators review cases (input, output, thought chain, injected guidelines),
-answer the four dimensions, and add guidelines — with similar existing
+answer the five dimensions, and add guidelines — with similar existing
 guidelines surfaced inline before saving. The Metrics view tracks the
 **intervention rate**: the share of reviewed cases needing correction. A
 declining curve is the whole point.
@@ -131,7 +132,7 @@ Every significant decision has an ADR in [docs/adr/](docs/adr). Highlights:
 
 ```bash
 uv sync --all-extras
-uv run pytest --cov=humanvals    # 55 tests, 98% coverage
+uv run pytest --cov=humanvals    # 59 tests, 98% coverage
 uv run ruff check . && uv run mypy
 cd dashboard && npm install && npm test && npm run build
 ```

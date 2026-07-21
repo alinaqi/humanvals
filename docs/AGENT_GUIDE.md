@@ -63,6 +63,8 @@ for case in hv.list_cases(unreviewed_only=True):
         intent_ok=True,        # did the agent understand the ask?
         output_ok=False,       # is the output correct? (this is the win/loss signal)
         context_ok=True,       # did it use the right context?
+        tool_ok=False,         # right tool calls? (default True = no tool problem)
+        expected_tool_call='orders.lookup(order_id) before replying',  # when tool_ok=False
         guideline_text='Always include the refund policy link',  # optional
         applies_when='refund requests',                          # scope, optional
         reviewer='ali'))

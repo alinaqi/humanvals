@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS cases (
   metadata TEXT, guidelines_injected TEXT, created_at REAL, reviewed INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS evaluations (
   id TEXT PRIMARY KEY, case_id TEXT, intent_ok INTEGER, output_ok INTEGER,
-  context_ok INTEGER, notes TEXT, guideline_text TEXT, applies_when TEXT,
+  context_ok INTEGER, tool_ok INTEGER DEFAULT 1, expected_tool_call TEXT DEFAULT '',
+  notes TEXT, guideline_text TEXT, applies_when TEXT,
   reviewer TEXT, created_at REAL);
 CREATE TABLE IF NOT EXISTS guidelines (
   id TEXT PRIMARY KEY, agent TEXT, namespace TEXT, intent_text TEXT, intent_vec TEXT,
@@ -28,7 +29,13 @@ CREATE TABLE IF NOT EXISTS exposure_credits (
 """
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+# version-gated ALTERs applied to databases created by older releases
+_MIGRATIONS: dict[int, list[str]] = {
+    2: ["ALTER TABLE evaluations ADD COLUMN tool_ok INTEGER DEFAULT 1",
+        "ALTER TABLE evaluations ADD COLUMN expected_tool_call TEXT DEFAULT ''"],
+}
 
 
 class SQLiteStore:
@@ -37,8 +44,21 @@ class SQLiteStore:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute('PRAGMA journal_mode=WAL')
         self.conn.execute('PRAGMA busy_timeout=5000')
+        self._migrate()
         self.conn.executescript(_SCHEMA)
         self.conn.execute(f'PRAGMA user_version={SCHEMA_VERSION}')
+
+    def _migrate(self) -> None:
+        version: int = self.conn.execute('PRAGMA user_version').fetchone()[0]
+        has_tables = self.conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE name='evaluations'").fetchone()
+        if version == 0 or not has_tables:
+            return  # fresh database: _SCHEMA creates everything current
+        for target in sorted(_MIGRATIONS):
+            if version < target:
+                for stmt in _MIGRATIONS[target]:
+                    self.conn.execute(stmt)
+        self.conn.commit()
 
     # -- cases ---------------------------------------------------------------
 
@@ -78,11 +98,18 @@ class SQLiteStore:
     def add_evaluation(self, ev: Evaluation) -> str:
         eid = new_id()
         self.conn.execute(
-            'INSERT INTO evaluations VALUES (?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO evaluations (id, case_id, intent_ok, output_ok, context_ok,'
+            ' tool_ok, expected_tool_call, notes, guideline_text, applies_when,'
+            ' reviewer, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
             (eid, ev.case_id, int(ev.intent_ok), int(ev.output_ok), int(ev.context_ok),
+             int(ev.tool_ok), ev.expected_tool_call,
              ev.notes, ev.guideline_text, ev.applies_when, ev.reviewer, time.time()))
         self.conn.commit()
         return eid
+
+    def list_case_evaluations(self, case_id: str) -> list[sqlite3.Row]:
+        return list(self.conn.execute(
+            'SELECT * FROM evaluations WHERE case_id=? ORDER BY rowid', (case_id,)))
 
     def list_evaluations(self, agent: str | None = None) -> list[sqlite3.Row]:
         sql = ('SELECT e.* FROM evaluations e JOIN cases c ON c.id = e.case_id')

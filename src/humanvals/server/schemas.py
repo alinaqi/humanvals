@@ -21,6 +21,8 @@ class EvaluationIn(BaseModel):
     output_ok: bool
     context_ok: bool
     reviewer: str
+    tool_ok: bool = True
+    expected_tool_call: str = ''
     notes: str = ''
     guideline_text: str = ''
     applies_when: str = ''
