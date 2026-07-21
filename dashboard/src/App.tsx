@@ -11,7 +11,7 @@ const TABS = ['Chat', 'Review', 'Guidelines', 'Metrics'] as const
 type Tab = (typeof TABS)[number]
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('Review')
+  const [tab, setTab] = useState<Tab>('Chat')
   const [summary, setSummary] = useState<Summary | null>(null)
 
   const refresh = useCallback(() => {
