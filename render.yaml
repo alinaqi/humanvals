@@ -5,12 +5,9 @@
 services:
   - type: web
     name: humanvals
-    runtime: python
+    runtime: docker
     plan: starter
-    buildCommand: |
-      pip install uv && uv sync --extra server
-      cd dashboard && npm ci && npm run build
-    startCommand: uv run uvicorn humanvals.server.app:create_app --factory --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/summary
     envVars:
       - key: HUMANVALS_DB
         value: /var/data/humanvals.db
