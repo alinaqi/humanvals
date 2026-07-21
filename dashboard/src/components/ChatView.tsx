@@ -57,7 +57,12 @@ export function ChatView({ onChanged }: { onChanged: () => void }) {
             )}
           </div>
         ))}
-        {messages.length === 0 && (
+        {busy && (
+          <div className="bubble assistant typing" role="status" aria-label="Agent is typing">
+            <span /><span /><span />
+          </div>
+        )}
+        {messages.length === 0 && !busy && (
           <div className="empty">Try: “I want a refund for my order #123, it arrived broken”</div>
         )}
         <div ref={endRef} />

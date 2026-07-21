@@ -72,6 +72,30 @@ describe('ChatView', () => {
   })
 })
 
+describe('ChatView typing indicator', () => {
+  it('shows while waiting for the agent reply', async () => {
+    const { fireEvent, waitFor } = await import('@testing-library/react')
+    const { ChatView } = await import('../ChatView')
+    let resolveReply: (r: Response) => void = () => {}
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockReturnValue(
+      new Promise<Response>(resolve => { resolveReply = resolve }))
+    render(<ChatView onChanged={() => {}} />)
+    fireEvent.change(screen.getByPlaceholderText('Message the support agent…'),
+      { target: { value: 'hi' } })
+    fireEvent.click(screen.getByText('Send'))
+    await waitFor(() =>
+      expect(screen.getByRole('status', { name: /agent is typing/i })).toBeInTheDocument())
+    resolveReply(new Response(JSON.stringify({
+      reply: 'Hello!', case_id: 'c1', guideline_ids: [], model: 'glm-5.2'
+    }), { status: 200 }))
+    await waitFor(() => {
+      expect(screen.getByText('Hello!')).toBeInTheDocument()
+      expect(screen.queryByRole('status', { name: /agent is typing/i })).toBeNull()
+    })
+    fetchMock.mockRestore()
+  })
+})
+
 describe('InterventionChart', () => {
   it('direct-labels the latest bucket value', () => {
     render(<InterventionChart series={[1, 0.5, 0.2]} />)
