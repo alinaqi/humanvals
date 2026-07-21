@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { Summary } from '../../types'
 import { EvalForm } from '../EvalForm'
 import { InterventionChart } from '../InterventionChart'
@@ -48,6 +48,27 @@ describe('EvalForm', () => {
     const toolSeg = screen.getByText('Right tool calls?').parentElement!
     fireEvent.click(toolSeg.querySelectorAll('button')[1])
     expect(screen.getByText('What should the tool call have been?')).toBeInTheDocument()
+  })
+})
+
+describe('ChatView', () => {
+  it('sends a message and shows the injection transparency line', async () => {
+    const { fireEvent, waitFor } = await import('@testing-library/react')
+    const { ChatView } = await import('../ChatView')
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({
+        reply: 'Refund on the way!', case_id: 'abc123',
+        guideline_ids: ['g1'], model: 'glm-5.2'
+      }), { status: 200 }))
+    render(<ChatView onChanged={() => {}} />)
+    fireEvent.change(screen.getByPlaceholderText('Message the support agent…'),
+      { target: { value: 'refund my order' } })
+    fireEvent.click(screen.getByText('Send'))
+    await waitFor(() => {
+      expect(screen.getByText('Refund on the way!')).toBeInTheDocument()
+      expect(screen.getByText(/1 guideline injected/)).toBeInTheDocument()
+    })
+    fetchMock.mockRestore()
   })
 })
 

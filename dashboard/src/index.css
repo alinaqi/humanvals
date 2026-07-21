@@ -109,5 +109,14 @@ td { border-bottom: 1px solid var(--border); padding: 8px 10px; vertical-align: 
 td.num { font-variant-numeric: tabular-nums; text-align: right; }
 
 .empty { color: var(--text-2); padding: 32px 0; text-align: center; }
+
+.chat-log { display: flex; flex-direction: column; gap: 10px; min-height: 260px;
+  max-height: 55vh; overflow-y: auto; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.bubble { max-width: 85%; padding: 8px 12px; border-radius: 10px; }
+.bubble.user { align-self: flex-end; background: var(--accent); color: #fff; }
+.bubble.assistant { align-self: flex-start; background: var(--surface);
+  border: 1px solid var(--border); }
+.bubble-meta { color: var(--text-2); font-size: 11px; margin-top: 6px; }
 .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: var(--surface);
   border-radius: 8px; padding: 10px 16px; font-size: 13px; }

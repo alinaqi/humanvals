@@ -10,12 +10,13 @@ import os
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 
 from humanvals import Evaluation, HumanVals
 from humanvals.models import Case, GuidelineSet
-from humanvals.server.schemas import CaseIn, ConflictQuery, EvaluationIn
+from humanvals.server import demo_agent
+from humanvals.server.schemas import CaseIn, ChatIn, ConflictQuery, EvaluationIn
 
 
 def create_app(hv: HumanVals | None = None) -> FastAPI:
@@ -100,6 +101,16 @@ def _register_routes(app: FastAPI, hv: HumanVals) -> None:  # noqa: C901
             return dataclasses.asdict(hv.metrics.guideline_impact(guideline_id))
         except KeyError as exc:
             raise HTTPException(404, str(exc)) from exc
+
+    @app.post('/api/demo/chat')
+    def demo_chat(body: ChatIn, request: Request) -> dict[str, Any]:
+        message = body.message.strip()
+        if not message or len(message) > demo_agent.MAX_MESSAGE_CHARS:
+            raise HTTPException(400, 'message must be 1-2000 characters')
+        ip = request.client.host if request.client else 'unknown'
+        if demo_agent.rate_limited(ip):
+            raise HTTPException(429, 'rate limit: try again in a minute')
+        return demo_agent.chat(hv, message)
 
     @app.post('/api/promotions/run')
     def run_promotions() -> dict[str, Any]:

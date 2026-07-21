@@ -30,6 +30,9 @@ export const api = {
   conflicts: (guidelineText: string, agent: string) =>
     post<Guideline[]>('/api/conflicts', { guideline_text: guidelineText, agent }),
   guidelines: () => get<Guideline[]>('/api/guidelines'),
+  chat: (message: string) =>
+    post<{ reply: string; case_id: string; guideline_ids: string[]; model: string }>(
+      '/api/demo/chat', { message }),
   runPromotions: () => post<{ changes: [string, string, string][] }>('/api/promotions/run'),
   intervention: () => get<InterventionReport>('/api/metrics/intervention')
 }

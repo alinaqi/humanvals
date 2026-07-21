@@ -35,3 +35,7 @@ class ConflictQuery(BaseModel):
     guideline_text: str
     agent: str
     namespace: str = 'default'
+
+
+class ChatIn(BaseModel):
+    message: str

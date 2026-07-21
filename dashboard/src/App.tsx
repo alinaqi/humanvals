@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
+import { ChatView } from './components/ChatView'
 import { GuidelinesView } from './components/GuidelinesView'
 import { MetricsView } from './components/MetricsView'
 import { ReviewView } from './components/ReviewView'
 import { SummaryTiles } from './components/SummaryTiles'
 import type { Summary } from './types'
 
-const TABS = ['Review', 'Guidelines', 'Metrics'] as const
+const TABS = ['Chat', 'Review', 'Guidelines', 'Metrics'] as const
 type Tab = (typeof TABS)[number]
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
           </button>
         ))}
       </nav>
+      {tab === 'Chat' && <ChatView onChanged={refresh} />}
       {tab === 'Review' && <ReviewView onChanged={refresh} />}
       {tab === 'Guidelines' && <GuidelinesView />}
       {tab === 'Metrics' && <MetricsView />}
