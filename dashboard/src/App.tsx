@@ -40,6 +40,7 @@ export default function App() {
       {tab === 'Review' && <ReviewView onChanged={refresh} />}
       {tab === 'Guidelines' && <GuidelinesView />}
       {tab === 'Metrics' && <MetricsView />}
+      <div className="watermark" aria-hidden="true">humanvals Playground</div>
     </>
   )
 }
